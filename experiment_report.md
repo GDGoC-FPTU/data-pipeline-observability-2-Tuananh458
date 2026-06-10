@@ -1,35 +1,30 @@
 # Experiment Report: Data Quality Impact on AI Agent
 
-**Student ID:** AI20K-XXXX
-**Name:** (Dien ten cua ban)
-**Date:** (Dien ngay thuc hien)
+**Student Email:** 26ai.anhhkt@vinuni.edu.vn
+**Name:** Hoàng Kim Tuấn Anh
+**Date:** 2026-06-10
 
 ---
 
-## 1. Ket qua thi nghiem
+## 1. Kết quả thí nghiệm
 
-Chay `agent_simulation.py` voi 2 bo du lieu va ghi lai ket qua:
+Chạy `agent_simulation.py` với 2 bộ dữ liệu và ghi lại kết quả:
 
 | Scenario | Agent Response | Accuracy (1-10) | Notes |
 |----------|----------------|-----------------|-------|
-| Clean Data (`processed_data.csv`) | (Ghi cau tra loi cua Agent) | | |
-| Garbage Data (`garbage_data.csv`) | (Ghi cau tra loi cua Agent) | | |
+| Clean Data (`processed_data.csv`) | Agent: Based on my data, the best choice is Laptop at $1200. | 9 | Trả lời đúng sản phẩm electronics đắt nhất sau khi ETL lọc dữ liệu |
+| Garbage Data (`garbage_data.csv`) | Agent: Based on my data, the best choice is Nuclear Reactor at $999999. | 2 | Trả lời sai do outlier và dữ liệu không được validate |
 
 ---
 
-## 2. Phan tich & nhan xet
+## 2. Phan tich & nhận xét
 
-### Tai sao Agent tra loi sai khi dung Garbage Data?
+### Tai sao Agent trả lời sai khi dùng Garbage Data?
 
-(Viet nhan xet cua ban o day — it nhat 50 tu)
-
-(Hay phan tich cac van de nhu Duplicate IDs, wrong data types, outliers, null values
-va giai thich tai sao chung anh huong den ket qua cua Agent.)
+Khi dùng Clean Data từ ETL pipeline, Agent hoạt động ổn định vì dữ liệu đã được validate (price > 0, category đầy đủ) và chuẩn hóa (Title Case). Ngược lại, Garbage Data chứa nhiều vấn đề chất lượng: Duplicate IDs (hai record cùng id=1), sai kiểu dữ liệu (price là chuỗi "ten dollars"), giá trị null (id, category trống), và outlier cực đoan (Nuclear Reactor giá 999999). Agent chọn sản phẩm có giá cao nhất trong nhóm electronics bằng `idxmax()`, nên bị đánh lừa bởi outlier thay vì Laptop. Dù prompt hỏi về sản phẩm tốt nhất, logic Agent phụ thuộc trực tiếp vào chất lượng CSV đầu vào. Nếu không có bước ETL lọc và chuẩn hóa trước, AI sẽ đưa ra kết quả sai lệch hoặc có thể crash khi gặp kiểu dữ liệu hỗn hợp.
 
 ---
 
-## 3. Ket luan
+## 3. Kết luận
 
-**Quality Data > Quality Prompt?** (Dong y hay khong? Giai thich ngan gon.)
-
-(Viet ket luan cua ban o day)
+**Quality Data > Quality Prompt?** Đồng ý. Prompt chỉ định hướng câu hỏi, nhưng Agent vẫn đọc trực tiếp từ file CSV. Nếu dữ liệu rác (outlier, null, sai type), kết quả sẽ sai dù prompt tốt đến đâu. ETL pipeline là lớp bảo vệ bắt buộc trước khi đưa dữ liệu vào hệ thống AI.
